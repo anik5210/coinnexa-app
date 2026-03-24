@@ -3,293 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoinNexa - Earn & Win</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>CoinNexa Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script src='//prizertruck.com/sdk.js' data-zone='10721994' async data-cfasync="false"></script>
+    
+    <script src='//whephiac.com/sdk.js' data-zone='10721994' data-sdk='show_8984365'></script>
 
     <style>
-        :root {
-            --primary: #6c5ce7;
-            --accent: #fab1a0;
-            --glass: rgba(255, 255, 255, 0.12);
-            --text: #ffffff;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-        body {
-            background: #0f0c29;
-            color: var(--text);
-            overflow-x: hidden;
-            height: 100vh;
-        }
-
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-
-        .app-container {
-            padding: 20px;
-            max-width: 450px;
-            margin: auto;
-            animation: fadeIn 1s ease;
-        }
-
-        .balance-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 35px 20px;
-            border-radius: 35px;
-            text-align: center;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-        }
-
-        .balance-amount {
-            font-size: 42px;
-            font-weight: 700;
-            color: var(--accent);
-            text-shadow: 0 0 15px rgba(250, 177, 160, 0.4);
-        }
-
-        .btn-action {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 20px;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-withdraw { background: #00b894; }
-        .btn-tele { background: #0088cc; text-decoration: none; }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: var(--glass);
-            padding: 15px;
-            border-radius: 22px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .bottom-sheet {
-            display: none;
-            background: #ffffff;
-            color: #2d3436;
-            padding: 30px;
-            border-radius: 30px 30px 0 0;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            animation: slideUp 0.4s ease-out;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-        }
-
-        input, select {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 2px solid #f1f2f6;
-            border-radius: 15px;
-            background: #f8f9fa;
-        }
-
-        .close-btn { float: right; font-size: 22px; color: #ff7675; cursor: pointer; }
-
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        :root { --primary: #5e60ce; --secondary: #4ea8de; --success: #2ecc71; --bg: #f8faff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
+        
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Dashboard Header */
+        .header { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid #eee; }
+        .user-pill { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+
+        /* Balance Card */
+        .balance-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 24px; padding: 30px 20px; color: white; position: relative; overflow: hidden; margin-top: 10px; box-shadow: 0 10px 20px rgba(94, 96, 206, 0.2); }
+        .balance-card h1 { font-size: 38px; margin: 5px 0; }
+        .balance-card p { font-size: 13px; opacity: 0.9; margin: 0; }
+
+        /* Task Cards */
+        .task-item { background: white; padding: 15px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        .task-info { display: flex; align-items: center; gap: 15px; }
+        .task-icon { font-size: 24px; color: var(--primary); }
+        .btn-start { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 500; cursor: pointer; }
+
+        /* Refer Section */
+        .refer-box { background: white; border-radius: 20px; padding: 20px; border: 1px solid #eee; text-align: center; }
+        .refer-link-box { background: #f0f4ff; padding: 12px; border-radius: 12px; font-size: 11px; word-break: break-all; margin: 15px 0; color: var(--primary); border: 1px dashed var(--primary); }
+
+        /* Wallet */
+        .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .method-card { background: white; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #eee; cursor: pointer; }
+        .method-card img { width: 50px; margin-bottom: 10px; }
+
+        /* Navigation */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #eee; box-shadow: 0 -5px 15px rgba(0,0,0,0.02); }
+        .nav-item { text-align: center; color: #999; font-size: 10px; flex: 1; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+
+        /* Buttons & Inputs */
+        .btn-full { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--primary); color: white; font-weight: 600; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
+    <div class="header">
+        <div class="user-pill">
+            <div class="avatar" id="avatar-char">U</div>
+            <div>
+                <b id="top-username">User</b><br>
+                <small style="color:#888" id="top-userid">ID: --</small>
+            </div>
+        </div>
+        <i class="fas fa-ellipsis-h" style="color:#ccc"></i>
+    </div>
 
-    <div class="app-container">
+    <div id="home" class="page active-page">
+        <h3>Hello, <span id="hello-name">User</span>!</h3>
+        <p style="margin-top:-10px; color:#888; font-size:13px">আজকে কিছু ইনকাম করি!</p>
+        
         <div class="balance-card">
-            <p style="font-size: 14px; opacity: 0.8;">AVAILABLE BALANCE</p>
-            <div class="balance-amount"><span id="user-pts">0</span> <small style="font-size: 18px;">Pts</small></div>
-            <p style="font-size: 12px; margin-top: 8px; color: #fab1a0; font-weight: 600;">৫০০০ পয়েন্ট = ৫০ টাকা (Min Withdraw)</p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-fingerprint" style="color: #55efc4;"></i>
-                <p style="font-size: 11px; opacity: 0.7;">Your User ID</p>
-                <b id="my-id" style="font-size: 14px;">...</b>
-            </div>
-            <div class="stat-card" onclick="claimDaily()">
-                <i class="fas fa-calendar-check" style="color: #ff7675;"></i>
-                <p style="font-size: 11px; opacity: 0.7;">Daily Bonus</p>
-                <b style="color: #fab1a0; cursor: pointer;">CLAIM</b>
+            <p>মোট ব্যালেন্স</p>
+            <h1 id="home-balance">0</h1>
+            <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:11px">
+                <span>উত্তোলন: 0</span>
+                <span>রেফারেল: 0</span>
             </div>
         </div>
-
-        <button class="btn-action" onclick="showAds()">
-            <i class="fas fa-play-circle"></i> Watch Video Ads (50 Pts)
+        <button class="btn-full" onclick="changePage('task')" style="background:var(--primary)">
+            <i class="fas fa-play-circle"></i> ভিডিও বিজ্ঞাপন দেখুন
         </button>
-
-        <button class="btn-action btn-withdraw" onclick="openSheet('withdraw-sheet')">
-            <i class="fas fa-wallet"></i> Withdraw Money
-        </button>
-
-        <button class="btn-action" style="background: #e17055;" onclick="openSheet('refer-sheet')">
-            <i class="fas fa-user-friends"></i> Refer & Earn (500 Pts)
-        </button>
-
-        <a href="https://t.me/coin_nexa" 
-           onclick="window.location.href='tg://resolve?domain=coin_nexa'; return false;" 
-           class="btn-action btn-tele">
-            <i class="fab fa-telegram"></i> Join Support Channel
-        </a>
     </div>
 
-    <div id="withdraw-sheet" class="bottom-sheet">
-        <i class="fas fa-times-circle close-btn" onclick="closeSheet('withdraw-sheet')"></i>
-        <h3>Withdraw (৫০ টাকা)</h3>
-        <p style="font-size: 12px; color: #d63031; margin-bottom: 10px;">মিনিমাম উত্তোলন ৫০০০ পয়েন্ট (৫০ টাকা)</p>
-        <select id="pay-method">
-            <option value="Bkash">Bkash</option>
-            <option value="Nagad">Nagad</option>
-        </select>
-        <input type="number" id="pay-number" placeholder="আপনার বিকাশ/নগদ নাম্বার">
-        <input type="number" id="pay-amount" placeholder="পয়েন্ট দিন (মিনিমাম ৫০০০)">
-        <button class="btn-action btn-withdraw" style="margin-top: 15px;" onclick="processPayout()">Submit Request</button>
+    <div id="task" class="page">
+        <h3>টাস্ক</h3>
+        <div style="background:#f0f4ff; color:var(--primary); padding:10px; border-radius:10px; font-size:12px; text-align:center; border:1px dashed var(--primary); margin-bottom:20px;">
+            সব টাস্ক ২৪ ঘণ্টা পর পর নতুন করে আসবে।
+        </div>
+        
+        <div class="task-item">
+            <div class="task-info">
+                <i class="fas fa-gift task-icon" style="color:#f1c40f"></i>
+                <div><b>Daily Login Bonus</b><br><small style="color:var(--success)">Reward: 100 Pts</small></div>
+            </div>
+            <button class="btn-start" onclick="claimDaily()">Start</button>
+        </div>
+
+        <div class="task-item">
+            <div class="task-info">
+                <i class="fas fa-play-circle task-icon"></i>
+                <div><b>অ্যাডস ভিউ ১৫ সেকেন্ড</b><br><small style="color:var(--success)">Reward: 50 Pts</small></div>
+            </div>
+            <button class="btn-start" onclick="showAds()">Start</button>
+        </div>
     </div>
 
-    <div id="refer-sheet" class="bottom-sheet">
-        <i class="fas fa-times-circle close-btn" onclick="closeSheet('refer-sheet')"></i>
-        <h3>Referral System</h3>
-        <p style="font-size: 13px; color: #636e72;">বন্ধুর রেফার কোডটি নিচে দিন এবং ৫০০ পয়েন্ট পান।</p>
-        <input type="text" id="ref-input" placeholder="Enter Referral Code">
-        <button class="btn-action" style="margin-top: 15px;" onclick="applyReferral()">Claim Points</button>
+    <div id="refer" class="page">
+        <h3>রেফার</h3>
+        <div class="balance-card" style="background: var(--success); padding:20px; margin-bottom:20px;">
+            <p>বন্ধুদের ইনভাইট করুন এবং বোনাস ইনকাম করুন।</p>
+            <div style="display:flex; gap:30px; margin-top:15px">
+                <div><small>রেফারেল</small><br><b>0</b></div>
+                <div><small>মোট ইনকাম</small><br><b>0 Pts</b></div>
+            </div>
+        </div>
+        <div class="refer-box">
+            <p style="font-size:13px">আপনার রেফারেল লিঙ্ক</p>
+            <div class="refer-link-box" id="ref-link">Loading...</div>
+            <div style="display:flex; gap:10px">
+                <button class="btn-full" style="background:var(--primary)" onclick="copyRef()"><i class="fas fa-copy"></i> কপি</button>
+                <button class="btn-full" style="background:#2c3e50"><i class="fas fa-share-alt"></i> শেয়ার</button>
+            </div>
+        </div>
     </div>
 
-    <script>
-        // --- Firebase Configuration Integrated ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBywmbQXwRRQ_5Iff5SsNBvLwsMLMtE5YU",
-            authDomain: "coinnexa-956d2.firebaseapp.com",
-            databaseURL: "https://coinnexa-956d2-default-rtdb.firebaseio.com",
-            projectId: "coinnexa-956d2",
-            storageBucket: "coinnexa-956d2.firebasestorage.app",
-            messagingSenderId: "1076354670673",
-            appId: "1:1076354670673:web:9469ae7a76a6db767fd870"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div id="wallet" class="page">
+        <h3>ওয়ালেট</h3>
+        <p style="font-size:13px; color:#666">পেমেন্ট মেথড সিলেক্ট করুন</p>
+        <div class="method-grid">
+            <div class="method-card" onclick="processWithdraw('Bkash')">
+                <img src="https://itshat.com.bd/wp-content/uploads/2022/02/Bkash-Logo.png" alt="Bkash">
+                <b>Bkash</b>
+            </div>
+            <div class="method-card" onclick="processWithdraw('Nagad')">
+                <img src="https://freelogopng.com/images/all_img/1679248787Nagad-Logo.png" alt="Nagad">
+                <b>Nagad</b>
+            </div>
+        </div>
+    </div>
 
-        // User Logic
-        let userId = localStorage.getItem('cn_user_official') || "CX" + Math.floor(1000 + Math.random() * 8999);
-        localStorage.setItem('cn_user_official', userId);
-        document.getElementById('my-id').innerText = userId;
-        let points = 0;
+    <div id="profile" class="page">
+        <h3>প্রোফাইল</h3>
+        <div class="refer-box" style="margin-bottom:20px">
+            <div class="avatar" style="width:70px; height:70px; margin:0 auto 10px; font-size:24px" id="prof-avatar">U</div>
+            <h2 style="margin:0" id="prof-name">User Name</h2>
+            <p style="color:#888; margin:0" id="prof-id">ID: 123456</p>
+        </div>
+        
+        <button class="btn-full" style="background:#eee; color:#333; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="window.location.href='https://t.me/yourlink'">
+            <span><i class="fab fa-telegram"></i> চ্যানেলে জয়েন করুন</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
 
-        // Sync with Database
-        db.ref('users/' + userId).on('value', (snap) => {
-            const data = snap.val();
-            if(data) {
-                points = data.points || 0;
-                document.getElementById('user-pts').innerText = points;
-            } else {
-                db.ref('users/' + userId).set({ points: 0, lastDaily: "", isRefUsed: false });
-            }
-        });
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="changePage('home', this)"><i class="fas fa-home"></i><span>হোম</span></div>
+        <div class="nav-item" onclick="changePage('task', this)"><i class="fas fa-list-ul"></i><span>টাস্ক</span></div>
+        <div class="nav-item" onclick="changePage('refer', this)"><i class="fas fa-users"></i><span>রেফার</span></div>
+        <div class="nav-item" onclick="changePage('wallet', this)"><i class="fas fa-wallet"></i><span>ওয়ালেট</span></div>
+        <div class="nav-item" onclick="changePage('profile', this)"><i class="fas fa-user"></i><span>প্রোফাইল</span></div>
+    </div>
 
-        // Background Animation (Three.js)
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-        const material = new THREE.MeshBasicMaterial({ color: 0x6c5ce7, wireframe: true, transparent: true, opacity: 0.1 });
-        const torus = new THREE.Mesh(geometry, material);
-        scene.add(torus);
-        camera.position.z = 30;
-        function animate() { requestAnimationFrame(animate); torus.rotation.x += 0.003; torus.rotation.y += 0.003; renderer.render(scene, camera); }
-        animate();
+<script>
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBywmbQXwRRQ_5Iff5SsNBvLwsMLMtE5YU",
+        authDomain: "coinnexa-956d2.firebaseapp.com",
+        databaseURL: "https://coinnexa-956d2-default-rtdb.firebaseio.com",
+        projectId: "coinnexa-956d2",
+        storageBucket: "coinnexa-956d2.firebasestorage.app",
+        messagingSenderId: "1076354670673",
+        appId: "1:1076354670673:web:9469ae7a76a6db767fd870"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        // Monetag Ad Call
-        function showAds() {
-            if (typeof show_8984365 === 'function') { 
-                show_8984365().then(() => { updateScore(50); });
-            } else {
-                alert("অ্যাড লোড হচ্ছে না। পুনরায় চেষ্টা করুন।");
-                // updateScore(50); // Debug only
-            }
+    // User Session
+    let userId = localStorage.getItem('coin_user_id') || 'ID' + Math.floor(100000 + Math.random() * 900000);
+    localStorage.setItem('coin_user_id', userId);
+    let userName = "User_" + userId.slice(-4);
+
+    const refLink = `https://t.me/Eranex_bot?startapp=${userId}`;
+
+    // UI Updates
+    document.getElementById('top-userid').innerText = "ID: " + userId;
+    document.getElementById('prof-id').innerText = "ID: " + userId;
+    document.getElementById('top-username').innerText = userName;
+    document.getElementById('prof-name').innerText = userName;
+    document.getElementById('hello-name').innerText = userName;
+    document.getElementById('ref-link').innerText = refLink;
+    document.getElementById('avatar-char').innerText = userName.charAt(0);
+    document.getElementById('prof-avatar').innerText = userName.charAt(0);
+
+    // Sync Balance
+    db.ref('users/' + userId).on('value', (snap) => {
+        let val = snap.val();
+        let pts = val ? (val.points || 0) : 0;
+        document.getElementById('home-balance').innerText = pts + " Pts";
+    });
+
+    // Page Navigation
+    function changePage(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(pageId).classList.add('active-page');
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
         }
-        function updateScore(amt) { db.ref('users/' + userId).update({ points: points + amt }); }
+    }
 
-        function claimDaily() {
-            const today = new Date().toDateString();
-            db.ref('users/' + userId).once('value', (s) => {
-                if(s.val().lastDaily === today) alert("আজকের বোনাস নেওয়া শেষ!");
-                else {
-                    db.ref('users/' + userId).update({ points: points + 50, lastDaily: today });
-                    alert("৫০ পয়েন্ট যোগ হয়েছে!");
-                }
+    // Task Logic
+    function showAds() {
+        if (typeof show_8984365 === 'function') {
+            show_8984365().then(() => {
+                db.ref('users/' + userId + '/points').transaction(c => (c || 0) + 50);
+                alert("শুভেচ্ছা! ৫০ পয়েন্ট যোগ হয়েছে।");
             });
+        } else { alert("Ad loading..."); }
+    }
+
+    function claimDaily() {
+        let lastClaim = localStorage.getItem('last_claim');
+        let today = new Date().toDateString();
+        if(lastClaim === today) return alert("আজকের বোনাস নেওয়া হয়ে গেছে!");
+        
+        db.ref('users/' + userId + '/points').transaction(c => (c || 0) + 100);
+        localStorage.setItem('last_claim', today);
+        alert("১০০ পয়েন্ট বোনাস পেলেন!");
+    }
+
+    function processWithdraw(method) {
+        let pts = parseInt(document.getElementById('home-balance').innerText);
+        if(pts < 5000) return alert("মিনিমাম ৫০০০ পয়েন্ট প্রয়োজন!");
+        
+        let num = prompt(method + " নাম্বার দিন:");
+        if(num) {
+            db.ref('payouts').push({ userId, method, num, amount: pts, status: 'Pending' });
+            db.ref('users/' + userId + '/points').set(0);
+            alert("আপনার রিকোয়েস্ট পেন্ডিং এ আছে।");
         }
+    }
 
-        function processPayout() {
-            const ph = document.getElementById('pay-number').value;
-            const am = parseInt(document.getElementById('pay-amount').value);
-            const mt = document.getElementById('pay-method').value;
-
-            if(am >= 5000 && points >= am) {
-                db.ref('payouts/').push({ 
-                    userId: userId, phone: ph, amount: am, method: mt, 
-                    status: "Pending", time: new Date().toLocaleString() 
-                });
-                db.ref('users/' + userId).update({ points: points - am });
-                alert("রিকোয়েস্ট সফল! ৫০ টাকা পেমেন্ট শীঘ্রই পাবেন।");
-                closeSheet('withdraw-sheet');
-            } else {
-                alert("ভুল ইনপুট! মিনিমাম ৫০০০ পয়েন্ট লাগবে।");
-            }
-        }
-
-        function applyReferral() {
-            db.ref('users/' + userId).once('value', (s) => {
-                if(s.val().isRefUsed) alert("রেফার কোড ব্যবহার করা শেষ!");
-                else {
-                    db.ref('users/' + userId).update({ points: points + 500, isRefUsed: true });
-                    alert("৫০০ পয়েন্ট অভিনন্দন!");
-                    closeSheet('refer-sheet');
-                }
-            });
-        }
-
-        function openSheet(id) { document.getElementById(id).style.display = 'block'; }
-        function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
-    </script>
+    function copyRef() {
+        navigator.clipboard.writeText(refLink);
+        alert("লিঙ্ক কপি হয়েছে!");
+    }
+</script>
 </body>
 </html>
