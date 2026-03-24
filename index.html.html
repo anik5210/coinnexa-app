@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoinNexa - Earn & Win</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script src='//prizertruck.com/sdk.js' data-zone='10721994' async data-cfasync="false"></script>
+
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --accent: #fab1a0;
+            --glass: rgba(255, 255, 255, 0.12);
+            --text: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: #0f0c29;
+            color: var(--text);
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .app-container {
+            padding: 20px;
+            max-width: 450px;
+            margin: auto;
+            animation: fadeIn 1s ease;
+        }
+
+        .balance-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            padding: 35px 20px;
+            border-radius: 35px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(250, 177, 160, 0.4);
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-withdraw { background: #00b894; }
+        .btn-tele { background: #0088cc; text-decoration: none; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 22px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .bottom-sheet {
+            display: none;
+            background: #ffffff;
+            color: #2d3436;
+            padding: 30px;
+            border-radius: 30px 30px 0 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            animation: slideUp 0.4s ease-out;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #f1f2f6;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+
+        .close-btn { float: right; font-size: 22px; color: #ff7675; cursor: pointer; }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container">
+        <div class="balance-card">
+            <p style="font-size: 14px; opacity: 0.8;">AVAILABLE BALANCE</p>
+            <div class="balance-amount"><span id="user-pts">0</span> <small style="font-size: 18px;">Pts</small></div>
+            <p style="font-size: 12px; margin-top: 8px; color: #fab1a0; font-weight: 600;">৫০০০ পয়েন্ট = ৫০ টাকা (Min Withdraw)</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-fingerprint" style="color: #55efc4;"></i>
+                <p style="font-size: 11px; opacity: 0.7;">Your User ID</p>
+                <b id="my-id" style="font-size: 14px;">...</b>
+            </div>
+            <div class="stat-card" onclick="claimDaily()">
+                <i class="fas fa-calendar-check" style="color: #ff7675;"></i>
+                <p style="font-size: 11px; opacity: 0.7;">Daily Bonus</p>
+                <b style="color: #fab1a0; cursor: pointer;">CLAIM</b>
+            </div>
+        </div>
+
+        <button class="btn-action" onclick="showAds()">
+            <i class="fas fa-play-circle"></i> Watch Video Ads (50 Pts)
+        </button>
+
+        <button class="btn-action btn-withdraw" onclick="openSheet('withdraw-sheet')">
+            <i class="fas fa-wallet"></i> Withdraw Money
+        </button>
+
+        <button class="btn-action" style="background: #e17055;" onclick="openSheet('refer-sheet')">
+            <i class="fas fa-user-friends"></i> Refer & Earn (500 Pts)
+        </button>
+
+        <a href="https://t.me/coin_nexa" 
+           onclick="window.location.href='tg://resolve?domain=coin_nexa'; return false;" 
+           class="btn-action btn-tele">
+            <i class="fab fa-telegram"></i> Join Support Channel
+        </a>
+    </div>
+
+    <div id="withdraw-sheet" class="bottom-sheet">
+        <i class="fas fa-times-circle close-btn" onclick="closeSheet('withdraw-sheet')"></i>
+        <h3>Withdraw (৫০ টাকা)</h3>
+        <p style="font-size: 12px; color: #d63031; margin-bottom: 10px;">মিনিমাম উত্তোলন ৫০০০ পয়েন্ট (৫০ টাকা)</p>
+        <select id="pay-method">
+            <option value="Bkash">Bkash</option>
+            <option value="Nagad">Nagad</option>
+        </select>
+        <input type="number" id="pay-number" placeholder="আপনার বিকাশ/নগদ নাম্বার">
+        <input type="number" id="pay-amount" placeholder="পয়েন্ট দিন (মিনিমাম ৫০০০)">
+        <button class="btn-action btn-withdraw" style="margin-top: 15px;" onclick="processPayout()">Submit Request</button>
+    </div>
+
+    <div id="refer-sheet" class="bottom-sheet">
+        <i class="fas fa-times-circle close-btn" onclick="closeSheet('refer-sheet')"></i>
+        <h3>Referral System</h3>
+        <p style="font-size: 13px; color: #636e72;">বন্ধুর রেফার কোডটি নিচে দিন এবং ৫০০ পয়েন্ট পান।</p>
+        <input type="text" id="ref-input" placeholder="Enter Referral Code">
+        <button class="btn-action" style="margin-top: 15px;" onclick="applyReferral()">Claim Points</button>
+    </div>
+
+    <script>
+        // --- Firebase Configuration Integrated ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBywmbQXwRRQ_5Iff5SsNBvLwsMLMtE5YU",
+            authDomain: "coinnexa-956d2.firebaseapp.com",
+            databaseURL: "https://coinnexa-956d2-default-rtdb.firebaseio.com",
+            projectId: "coinnexa-956d2",
+            storageBucket: "coinnexa-956d2.firebasestorage.app",
+            messagingSenderId: "1076354670673",
+            appId: "1:1076354670673:web:9469ae7a76a6db767fd870"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // User Logic
+        let userId = localStorage.getItem('cn_user_official') || "CX" + Math.floor(1000 + Math.random() * 8999);
+        localStorage.setItem('cn_user_official', userId);
+        document.getElementById('my-id').innerText = userId;
+        let points = 0;
+
+        // Sync with Database
+        db.ref('users/' + userId).on('value', (snap) => {
+            const data = snap.val();
+            if(data) {
+                points = data.points || 0;
+                document.getElementById('user-pts').innerText = points;
+            } else {
+                db.ref('users/' + userId).set({ points: 0, lastDaily: "", isRefUsed: false });
+            }
+        });
+
+        // Background Animation (Three.js)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
+        const material = new THREE.MeshBasicMaterial({ color: 0x6c5ce7, wireframe: true, transparent: true, opacity: 0.1 });
+        const torus = new THREE.Mesh(geometry, material);
+        scene.add(torus);
+        camera.position.z = 30;
+        function animate() { requestAnimationFrame(animate); torus.rotation.x += 0.003; torus.rotation.y += 0.003; renderer.render(scene, camera); }
+        animate();
+
+        // Monetag Ad Call
+        function showAds() {
+            if (typeof show_8984365 === 'function') { 
+                show_8984365().then(() => { updateScore(50); });
+            } else {
+                alert("অ্যাড লোড হচ্ছে না। পুনরায় চেষ্টা করুন।");
+                // updateScore(50); // Debug only
+            }
+        }
+        function updateScore(amt) { db.ref('users/' + userId).update({ points: points + amt }); }
+
+        function claimDaily() {
+            const today = new Date().toDateString();
+            db.ref('users/' + userId).once('value', (s) => {
+                if(s.val().lastDaily === today) alert("আজকের বোনাস নেওয়া শেষ!");
+                else {
+                    db.ref('users/' + userId).update({ points: points + 50, lastDaily: today });
+                    alert("৫০ পয়েন্ট যোগ হয়েছে!");
+                }
+            });
+        }
+
+        function processPayout() {
+            const ph = document.getElementById('pay-number').value;
+            const am = parseInt(document.getElementById('pay-amount').value);
+            const mt = document.getElementById('pay-method').value;
+
+            if(am >= 5000 && points >= am) {
+                db.ref('payouts/').push({ 
+                    userId: userId, phone: ph, amount: am, method: mt, 
+                    status: "Pending", time: new Date().toLocaleString() 
+                });
+                db.ref('users/' + userId).update({ points: points - am });
+                alert("রিকোয়েস্ট সফল! ৫০ টাকা পেমেন্ট শীঘ্রই পাবেন।");
+                closeSheet('withdraw-sheet');
+            } else {
+                alert("ভুল ইনপুট! মিনিমাম ৫০০০ পয়েন্ট লাগবে।");
+            }
+        }
+
+        function applyReferral() {
+            db.ref('users/' + userId).once('value', (s) => {
+                if(s.val().isRefUsed) alert("রেফার কোড ব্যবহার করা শেষ!");
+                else {
+                    db.ref('users/' + userId).update({ points: points + 500, isRefUsed: true });
+                    alert("৫০০ পয়েন্ট অভিনন্দন!");
+                    closeSheet('refer-sheet');
+                }
+            });
+        }
+
+        function openSheet(id) { document.getElementById(id).style.display = 'block'; }
+        function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+</html>
